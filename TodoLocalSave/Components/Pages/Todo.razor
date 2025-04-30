@@ -10,6 +10,12 @@
 <input placeholder="Something to do" @bind="newTodo" />
 <button @onclick="AddToDo">Add to do</button>
 
+<br />
+<br />
+
+<button @onclick="Save">Save</button>
+<button @onclick="Load">Load</button>
+
 <ul>
 	@foreach(var todo in todos)
 	{
@@ -36,4 +42,26 @@
 		}
 	}
 
+	private async Task Save()
+	{
+		var contents = JsonSerializer.Serialize(todos);
+		var path = Path.Combine(FileSystem.AppDataDirectory, "todo.json");
+		File.WriteAllText(path, contents);
+		await App.Current.MainPage.DisplayAlert("List Saved", "List has been save to " + path, "OK");
+	}
+
+	private async Task Load()
+	{
+		var path = Path.Combine(FileSystem.AppDataDirectory, "todo.json");
+
+		if(!File.Exists(path))
+		{
+			return;
+		}
+		var contents = File.ReadAllText(path);
+
+		var savedItems = JsonSerializer.Deserialize<List<TodoItem>>(contents);
+
+		todos.AddRange(savedItems);
+	}
 }
